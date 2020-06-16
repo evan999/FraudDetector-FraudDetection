@@ -37,13 +37,49 @@ def RunModel(model, X_train, y_train, X_test, y_test):
    return matrix, pred
 
 
-df = pd.read_csv("transaction_dataset.csv")
+data_frame = pd.read_csv("transaction_dataset.csv")
 is_fraud = {0:'Not Fraud', 1:'Fraud'}
 is_flagged_fraud = {0:'Not Fraud', 1:'Fraud'} 
-is_flagged_fraud
-print(df.isFraud.value_counts().rename(index = is_fraud))
+print(data_frame.isFraud.value_counts().rename(index = is_fraud))
+print(data_frame.isFlaggedFraud.value_counts().rename(index = is_flagged_fraud))
+
+#columns = ['amount', 'oldbalanceOrg', 'newbalanceOrig' , 'oldbalanceDest', 'newbalanceDest']
+
+#features = df[columns]
+
+#feature_names = data_frame.iloc[:, 1:12].columns
+feature_names = ['amount', 'oldbalanceOrg', 'newbalanceOrig' , 'oldbalanceDest', 'newbalanceDest']
+target = data_frame.iloc[:1, 9:10].columns
+
+data_features = data_frame[feature_names]
+data_target = data_frame[target]
+
+#Split the dataset into training and test sets
+from sklearn.model_selection import train_test_split
+np.random.seed(123)
+
+X_train, X_test, y_train, y_test = train_test_split(data_features, data_target, train_size=0.70, test_size=0.30, random_state=1)
+
+from sklearn.linear_model import LogisticRegression
+lr = LogisticRegression()
+cmat, pred = RunModel(lr, X_train, y_train, X_test, y_test)
+PrintStats(cmat, y_test, pred)
+
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(n_estimators = 100, n_jobs =4)
+cmat, pred = RunModel(rf, X_train, y_train, X_test, y_test)
+PrintStats(cmat, y_test, pred)
 
 
-columns = ['amount', 'oldbalanceOrg', 'newbalanceOrig' , 'oldbalanceDest', 'newbalanceDest']
+#Oversampling
+fraud_records = len(data_frame[data_frame.isFraud == 1])
+fraud_indices = data_frame[data_frame.isFraud == 1].index
+normal_indices = data_frame[data_frame.isFraud == 0].index
 
-features = dataset[columns]
+under_sample_indices = np.random.choice(normal_indices, fraud_records, False)
+
+dataframe_undersampled = data_frame.iloc[np.concatenate([fraud_indices,under_sample_indices]),:]
+
+
+
+
