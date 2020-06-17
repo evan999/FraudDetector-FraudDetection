@@ -71,7 +71,7 @@ cmat, pred = RunModel(rf, X_train, y_train, X_test, y_test)
 PrintStats(cmat, y_test, pred)
 
 
-#Oversampling
+#Undersampling
 fraud_records = len(data_frame[data_frame.isFraud == 1])
 fraud_indices = data_frame[data_frame.isFraud == 1].index
 normal_indices = data_frame[data_frame.isFraud == 0].index
@@ -79,7 +79,14 @@ normal_indices = data_frame[data_frame.isFraud == 0].index
 under_sample_indices = np.random.choice(normal_indices, fraud_records, False)
 
 dataframe_undersampled = data_frame.iloc[np.concatenate([fraud_indices,under_sample_indices]),:]
+X_undersampled = dataframe_undersampled.iloc[:, [2, 4, 5, 7, 8]]
+Y_undersampled = dataframe_undersampled.isFraud
+X_undersampled_train, X_undersampled_test, Y_undersampled_train, Y_undersampled_test = train_test_split(X_undersampled,Y_undersampled,test_size = 0.3)
+lr_undersampled = LogisticRegression(C=1)
 
+# run the new model
+cmat, pred = RunModel(lr_undersampled, X_undersampled_train, Y_undersampled_train, X_undersampled_test, Y_undersampled_test)
+PrintStats(cmat, Y_undersampled_test, pred)
 
 
 
